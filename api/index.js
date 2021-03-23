@@ -21,14 +21,14 @@ app.use(express.urlencoded({
   extended: true
 }));
 
-app.post('/profile', upload.single('file'), async function (req, res, next) {
+app.post('/upload', upload.single('file'), async function (req, res, next) {
   // req.file is the `avatar` file
   // req.body will hold the text fields, if there were any
 
   const file = req.file;
   fs.readFile(file.path, function (err, data) {
     if (err) throw err; // Something went wrong!
-    const s3bucket = new AWS.S3({ params: { Bucket: 'dev1.bakelights.com' } });
+    const s3bucket = new AWS.S3({ params: { Bucket: 'dev4-bakelights' } });
     s3bucket.createBucket(function () {
       const params = {
         Key: file.originalname, //file.name doesn't exist as a property

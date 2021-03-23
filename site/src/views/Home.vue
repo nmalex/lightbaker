@@ -14,7 +14,7 @@
         />
       </label>
       <button v-on:click="submitFile()">Submit</button> <br />
-      <div id="myProgress">my progress</div>
+      <div v-html="progressPercentage"></div>
     </div>
   </div>
 </template>
@@ -36,21 +36,24 @@ export default {
   data() {
     return {
       file: "",
+      progressPercentage: 90,
     };
   },
 
   methods: {
     submitFile() {
       var bucket = new AWS.S3({
-        accessKeyId: "AKIAYYBKYWW3Z2AAHLSY",
-        secretAccessKey: "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",
+        accessKeyId: "AKIAYYBKYWW37UJNJB5L",
+        secretAccessKey: "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",
         region: "eu-central-1",
       });
+
+      const folderName = "folder1";
 
       const uploadfile = function (fileName, file, folderName) {
         const params = {
           Bucket: "dev2.bakelights.com",
-          Key: folderName + fileName,
+          Key: folderName + "/" + fileName,
           Body: file,
           ContentType: file.type,
         };
@@ -64,36 +67,13 @@ export default {
         });
       };
 
-      let upload1 = uploadfile(uniqueFileName, file, folderName);
+      let upload1 = uploadfile(this.file.name, this.file, folderName);
       upload1.on("httpUploadProgress", function (progress) {
         let progressPercentage =
           Math.round((progress.loaded / progress.total) * 1000) / 10;
         console.log(progressPercentage);
-      });
-
-      /* var formData = new FormData();
-      formData.append("file", this.file);
-      var xhr = new XMLHttpRequest();
-
-      // your url upload
-      xhr.open("post", `${API_URL}/profile`, true);
-
-      xhr.upload.onprogress = function (e) {
-        if (e.lengthComputable) {
-          var percentage = (e.loaded / e.total) * 100;
-          console.log(percentage + "%");
-        }
-      };
-
-      xhr.onerror = function (e) {
-        console.log("Error");
-        console.log(e);
-      };
-      xhr.onload = function () {
-        console.log(this.statusText);
-      };
-
-      xhr.send(formData); */
+        this.progressPercentage = progressPercentage;
+      }.bind(this));
     },
 
     handleFileUpload() {
