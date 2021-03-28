@@ -5,6 +5,7 @@ const upload = multer({
   dest: 'uploads/'
 });
 const fs = require('fs');
+const path = require('path');
 
 const { Pool } = require("pg");
 
@@ -32,9 +33,13 @@ app.post('/upload', upload.single('file'), async function (req, res, next) {
 
   const file = req.file;
 
+  const fileExt = path.extname(file.originalname);
+  const newFileName = `${file.filename}${fileExt}`;
+  fs.renameSync(file.filename, newFileName);
+
   const client = await pool.connect();
   client.query(
-    `INSERT INTO public.job(filename, originalname, path, mimetype, size, status) VALUES('${file.filename}', '${file.originalname}', '${file.path}', '${file.mimetype}', ${file.size}, 'pending')`,
+    `INSERT INTO public.job(filename, originalname, path, mimetype, size, status) VALUES('${newFileName}', '${file.originalname}', '${file.path}', '${file.mimetype}', ${file.size}, 'pending')`,
     (err, res1) => {
       console.log(err, res1);
 

@@ -54,12 +54,13 @@ export default {
           headers: {
             "Content-Type": "multipart/form-data",
           },
+          onUploadProgress: progressEvent => console.log(progressEvent),
         })
-        .then(function () {
-          console.log("SUCCESS!!");
+        .then(function ({ data }) {
+          console.log("SUCCESS!! ", data);
         })
-        .catch(function () {
-          console.log("FAILURE!!");
+        .catch(function (err) {
+          console.log("FAILURE!! ", err);
         });
     },
 
