@@ -7,17 +7,18 @@ const upload = multer({
 const fs = require('fs');
 const path = require('path');
 const axios = require("axios");
+const { uuid } = require('uuidv4');
 
 const { Pool } = require("pg");
 
 const Settings = require("./settings");
 
 const pool = new Pool({
-  user: "postgres",
-  host: "localhost",
-  database: "dev-bakelights",
+  user: Settings.postgres_user,
+  host: Settings.postgres_host,
+  database: Settings.postgres_database,
   password: Settings.postgres_password,
-  port: "5432"
+  port: Settings.postgres_port,
 });
 
 const app = express();
@@ -97,21 +98,25 @@ app.post('/upload', upload.single('file'), async function (req, res, next) {
   // req.body will hold the text fields, if there were any
 
   const file = req.file;
+  console.log(` >> file: `, file);
 
   const fileExt = path.extname(file.originalname);
   const newFileName = `${file.filename}${fileExt}`;
-  fs.renameSync(file.filename, newFileName);
+  const newFilePath = file.destination + newFileName;
+  fs.renameSync(file.destination + file.filename, newFilePath);
+
+  const guid = uuid();
 
   const client = await pool.connect();
   client.query(
-    `INSERT INTO public.job(filename, originalname, path, mimetype, size, status) VALUES('${newFileName}', '${file.originalname}', '${file.path}', '${file.mimetype}', ${file.size}, 'pending')`,
+    `INSERT INTO public.job(guid, filename, originalname, filepath, mimetype, filesize, status) VALUES('${guid}', '${newFileName}', '${file.originalname}', '${newFilePath}', '${file.mimetype}', ${file.size}, 'pending')`,
     (err, res1) => {
       console.log(err, res1);
 
-      let p = await doconvert();
+      // let p = await doconvert();
 
       res.status(200);
-      res.end(JSON.stringify({ ok: true, data: {} }, null, 2));
+      res.end(JSON.stringify({ ok: true, data: { path: "/file/" + newFileName } }, null, 2));
 
       client.end();
     }
@@ -125,7 +130,7 @@ app.get('/', async (req, res) => {
 });
 
 app.get('/file/:filename', async (req, res) => {
-    const file = `/upload/${req.params.filename}`;
+    const file = `./uploads/${req.params.filename}`;
     res.download(file); // Set disposition and send it.
 });
 
