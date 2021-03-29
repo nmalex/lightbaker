@@ -1,0 +1,18 @@
+{
+  "name": "test_convert2",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build": "webpack --config webpack.config.js",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node ./dist/bundle.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^0.18.1",
+    "path": "^0.12.7",
+    "renderfarm": "^1.1.23"
+  }
+}
