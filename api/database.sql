@@ -1,18 +1,18 @@
-CREATE SEQUENCE job_id_seq;
+CREATE SEQUENCE file_id_seq;
 
-CREATE TABLE public.job (
-    id integer NOT NULL DEFAULT nextval('job_id_seq'),
+CREATE TABLE public.file (
+    id integer NOT NULL DEFAULT nextval('file_id_seq'),
+    userid integer,
     createdat timestamp with time zone DEFAULT now() NOT NULL,
     guid text,
     filename text,
     originalname text,
     filepath text,
     mimetype text,
-    filesize integer,
-    status text
+    filesize integer
 );
 
-ALTER TABLE ONLY public.job
-    ADD CONSTRAINT job_pkey PRIMARY KEY (id);
+ALTER TABLE ONLY public.file
+    ADD CONSTRAINT file_pkey PRIMARY KEY (id);
 
-ALTER SEQUENCE job_id_seq OWNED BY job.id;
+ALTER SEQUENCE file_id_seq OWNED BY file.id;

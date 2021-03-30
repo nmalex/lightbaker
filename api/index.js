@@ -100,23 +100,23 @@ app.post('/upload', upload.single('file'), async function (req, res, next) {
   const file = req.file;
   console.log(` >> file: `, file);
 
+  const guid = uuid();
+
   const fileExt = path.extname(file.originalname);
-  const newFileName = `${file.filename}${fileExt}`;
+  const newFileName = `${guid}${fileExt}`;
   const newFilePath = file.destination + newFileName;
   fs.renameSync(file.destination + file.filename, newFilePath);
 
-  const guid = uuid();
-
   const client = await pool.connect();
   client.query(
-    `INSERT INTO public.job(guid, filename, originalname, filepath, mimetype, filesize, status) VALUES('${guid}', '${newFileName}', '${file.originalname}', '${newFilePath}', '${file.mimetype}', ${file.size}, 'pending')`,
+    `INSERT INTO public.file(guid, filename, originalname, filepath, mimetype, filesize) VALUES('${guid}', '${newFileName}', '${file.originalname}', '${newFilePath}', '${file.mimetype}', ${file.size})`,
     (err, res1) => {
       console.log(err, res1);
 
       // let p = await doconvert();
 
       res.status(200);
-      res.end(JSON.stringify({ ok: true, data: { path: "/file/" + newFileName } }, null, 2));
+      res.end(JSON.stringify({ ok: true, data: { url: `${Settings.public_url}/file/${newFileName}` } }, null, 2));
 
       client.end();
     }
@@ -139,8 +139,8 @@ app.listen(Settings.port, () => {
 });
 
 setInterval(async function () {
-  const client = await pool.connect();
-  client.query("WITH cte AS (SELECT * FROM public.job WHERE status='pending' ORDER BY createdat LIMIT 1) UPDATE job s SET status='running' FROM cte WHERE s.id=cte.id RETURNING s.*", (err, res) => {
+  //const client = await pool.connect();
+  /* client.query("WITH cte AS (SELECT * FROM public.file WHERE status='pending' ORDER BY createdat LIMIT 1) UPDATE job s SET status='running' FROM cte WHERE s.id=cte.id RETURNING s.*", (err, res) => {
     if (err) {
       console.error(err);
       return;
@@ -149,5 +149,5 @@ setInterval(async function () {
       console.log(row);
     }
     client.end();
-  });
+  }); */
 }, 5000);
